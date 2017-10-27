@@ -66,3 +66,240 @@ git remote 不带参数，列出已经存在的远程分支
 git pull origin master 取回远程库并关联当前分支
 git branch 查看本地分支  git branch -a   查看远程分支
 git branch XXX 创建分支    git push origin test  把分支推到远程分支    git checkout XXX  切换XX分支
+Linux操作常用命令：
+
+
+init 0  关机
+init 1  单用户模式
+init 2  非联网多用户模式
+init 3 联网
+init 4 预备
+init 5 联网+图形化
+init 6  重启
+
+
+hostname--查看主机名
+pwd--查看绝对路径
+list--查看当前目录下的内容
+    ls -l=ll  列出详细信息
+    ls -s -h  文件大小，大小+单位
+    ls -d +目录   显示目录的属性
+    ls -R（recursive） +目录   级联显示
+    ls -a显示当前目录下的隐藏文件
+mkdir -p 连同父级目录一起创建
+      -v 显示详细信息
+cp 源文件 目标目录
+cp 源文件 目标目录/新文件名  拷贝文件到指定目录并重命名
+cp -r 
+
+mv  剪切
+rm  移除
+cat 查看
+more
+
+less 
+head 文件名  默认下返回文件的前十行，+数字表示返回文件的行数
+tail 文件名  默认状态下查看文件的后十行，+数字显示文件的后N行
+tail -f /var/log/messages 实时显示文件
+head -15 passwd | tail -1 只查看第15行的文件
+文档查看模式下 输入：\ 查找，n往下查找，N往上查找
+
+ls /etc > etc.log 把输出重定向到etc.log
+ls >> etc.log 追加重定向，往文件的尾部追加重定向内容
+ls 2> err.log 错误信息重定向
+ls &> etc.log 全部重定向，无论错误信息还是正确信息
+lls > 1.log 2> 2.log 正确信息重定向到1.log，错误信息重定向到2.log
+lls &>> 1.log  追加到1.log 
+set -C 不允许重定向已存在的文件
+set +C 允许重定向到已存在的文件，覆盖里面的内容
+
+
+alias 别名    只是在当前会话生效
+alias lsh="ls -sh"
+which ls 
+alias grep="grep --color=auto' 设置grep别名
+unalias grep 取消别名
+gedit 文件名   图形化编辑器
+source 文件名  刷新文件
+
+vim编辑器---从命令模式进入到编辑模式
+
+a--追加
+i--插入
+A--行尾
+Z--行首
+o--光标所在行下一行输入
+O--光标所在上一行输入
+I--行首输入
+A--行尾输入
+r--替换单个字符
+R--连续替换，进入替换模式，连续替换内容，知道ESC退到命令模式
+x--删除当前光标所在字符，只删一个
+d+w--删除单词（光标一定要在单词的最开始，否则删除光标及之后的字符）
+D-- 删除光标之后的所有字符
+d+^(或者d+shift+6)--删除光标之前的所有字符
+dd --删除光标当前所在行
+数字+dd--删除多行
+编辑模式 ctrl+u--删除光标之前的所有字符
+
+dd--剪切
+-vv或数字+vv 复制多行
+-p--粘贴到光标所在下一行
+-P--粘贴到光标所在上一行
+-u--撤销
+
+
+
+
+
+
+
+useradd
+chmod--修改权限
+chown oracle passwd 更改所有者
+chown :mysql passwd 更改属组
+chmod u+s /bin/cat   为命令设置suid
+uid euid有效
+
+
+权限--------------------
+ugo权限：只针对普通用户有效，对root无效
+u=user 属主  g=group 属组  o=other
+三位一组
+-rw-r--r-- 
+r--read 读
+w--write 写-修改权限
+x--execute 可执行
+
+rpm软件安装----------------rpm -ivh 软件包 
+查看安装目录（安装完成后都可以查看到）
+查看软件基本信息（软件的信息，版本，软件的官网地址）
+查看某一个软件是否已经安装
+查看都一个文件属于哪个软件
+查看操作系统软件安装列表
+卸载软件
+学其他的操作系统的软件安装
+
+ctrl+r  取消撤销动作
+
+
+光标位置的移动：
+-数字+上下左右箭头    向上下左右移动N行/字符
+ctrl+左右箭头  向左右移动，一个空格为隔断
+-gg   定位到文本开头
+-G    定位到文本的文本结尾
+
+
+可视化模式：（命令模式的一种）
+-v   可视--不规则的块选择
+-ctrl+v   可视块--规则的块选择
+-V 可视化
+
+添加注释：
+--用可视化模式选择第一列--I--输入注释符#--俩次ESC
+
+尾行模式：
+查找：/keyword 回车  上翻N  下翻n
+
+设置：
+设置行号
+:set nu 
+:set nonu  //取消行号
+
+设置查找的时候不区分大小写（正常情况下是区分大小写的，演示一个user/User
+的 ）
+:set ic
+:set noic //取消不区分
+
+#!/bin/bash
+if [-e /tmp/test/passwd ]; then
+echo "file is exist";
+else
+echo "file is not exist";
+fi
+
+
+#chmod +x a.sh 赋予脚本可执行权限
+#./a.sh   执行脚本
+
+
+设置tab键的长度
+-:set ts=4 //设置完立即生效
+
+替换的操作:
+               %s/var/VAR/g
+               %    表示所有行
+              
+               3s/var/VAR/g     只替换第三行的内容
+               3,8s/var/VAR/g   替换3-8行中的内容
+               s/var/VAR/g       只替换当前光标所在行的var
+               
+               /被替换的文本/替换以后的文本/
+
+               %s;var;VAR;g             也可以
+                g→  global          一行全局替换
+
+
+添加注释
+:22,26s/^/#/            ^       每一行的开头  (22-26行添加注释)
+
+
+            永久生效:(只对vim生效,对其他不生效,修改vim的配置文件)
+#vim /etc/vimrc  
+#vim ~/.vimrc
+set nu
+set ic
+set ci
+set si
+set ts=4
+               
+               :w       → 只保存不退出(w!强制保存)
+               :wq    → 保存退出(wq!强行保存退出)
+               :x       → 保存退出
+               ZZ       → 保存退出
+               :q       → 退出(但是有时候直接q,不能退出,添加!,强制退出)
+               :q!      → 强制退出
+               :w  想存的路径   → 另存为
+               :r    ~/.vimrc           → 能够读取另一个文件内容    
+               :数字      →    光标定位到数字行
+               :sp          → 横着打开另一个文件        
+               :vsp         → 竖着打开另一个文件
+               ctrl+ww      切换窗口到下一个
+               ctrl+w+方向键       切换到另一个窗口
+
+
+dw --删除光标之后的一个单词
+shift+d
+d+^
+
+
+/bin--binary,二进制文件，可执行的命令
+/sbin--super binary 只有管理员才能使用的命令
+/usr--unix software resource--放置安装包的目录
+   -/usr/local/src
+   -/usr/src
+/var--variable
+/etc--Editable Text Configuration-可编辑的配置文件
+/home--用户的家目录
+/root--root的家目录~~~~~~
+/boot--
+/tmp--temporary-临时文件目录
+/dev--device-设备文件
+/mnt--mount-挂载
+
+oracle的安装目录：/oracle/app/oracle/product/11.2.0/db--
+mysql的安装目录：/usr/local/mysql
+mysql的数据文件存放目录：/data/mysql
+
+
+/etc/sysconfig/network-scripts/ifcfg-eth0网卡文件绝对路径
+/etc/sysconfig/network
+000000一个扇区是512字节
+
+
+vim ../conf/server.xml 
+
+ps -ef|grep XX 查看进程
+
+mongodump -u mongodbuser -p xx -d db -h 远端IP地址 --port 27017 -o xx  导出mongo数据，备份。
+
