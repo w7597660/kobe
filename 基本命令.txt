@@ -64,3 +64,5 @@ git reflog   查看提交版本ID
 彻底删除： git rm xxx；git commit -m 'xxx' 不彻底删除即可恢复git checkout -- readme.txt 注：只能恢复文件到最新版本
 git remote 不带参数，列出已经存在的远程分支
 git pull origin master 取回远程库并关联当前分支
+git branch 查看本地分支  git branch -a   查看远程分支
+git branch XXX 创建分支    git push origin test  把分支推到远程分支    git checkout XXX  切换XX分支
