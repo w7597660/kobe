@@ -1,0 +1,64 @@
+shift+g 最底层   
+
+
+
+mysql -uhtxtb -p -h192.168.100.170
+
+source F:\hello world\test.sql 
+
+yum update 更新整个仓库版本，yum upgrade 更新软件包
+ 
+
+\! pwd;     mysql查看系统命令
+
+mysql:
+
+进库：1：show databases；查看所有库，2：use+:库名。3：show tables；查看所有表，4：select * from XXX 查看表。
+
+delete from 表名 where XXX   删除某行。
+
+insert into 表名 (选取增加的内容) value （设定值）         增加行。
+
+desc 表明，查看表结构
+
+update 表名称 set 列名称 = "新值" where 相应列    修改语句
+
+alter table 表名称 change 相应列，新列，（设定值）  修改字段
+
+
+/etc/init.d/crond  restart  
+
+touch -c -t 05061803 file   更改文件时间
+
+touch filename 创建空文件， mkdir filename 创建文件夹， mkdir -p x/x/x/x 创建父级目录
+
+mv file newfile 更改文件名  mv file 路径 移动文件
+
+uptime 查看系统运行时间 uname -a 查看系统版本    ps -u 查看用户进程
+
+/etc/init.d/crond  restart   重启cron
+
+/etc/rc.d/init.d/network restart 重启网卡， setup 配置网卡
+
+tail -f ../logs/XXX  查看实时日志
+
+zgrep -A 300 '2017-09-08 14:23:33'  catalina.out-201709* >> 300xx.txt 
+
+show processlist 查看数据库连接池
+
+YWB.list2016
+
+scp ywb_root@114.55.129.7:/home/ywb_root/ucs_mp.sql.tar.gz . 远程传输
+
+XXXX = input()
+XXXX                 设置变量
+
+提交顺序： git add 文件,   git commit -m 'XXX'  
+git checkout -- readme.txt   撤销修改，回到最近一次版本
+git status  查看git库当前状态
+git diff 查看更改的内容
+git reset --hard HEAD^ 回退当前版本  ^表示上一个版本，以此类推
+git reset --hard +版本号，   回到版本
+git reflog   查看提交版本ID
+删除文件，rm xxx 工作区删除，版本库还在，
+彻底删除： git rm xxx；git commit -m 'xxx' 不彻底删除即可恢复git checkout -- readme.txt 注：只能恢复文件到最新版本
