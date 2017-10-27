@@ -62,3 +62,5 @@ git reset --hard +版本号，   回到版本
 git reflog   查看提交版本ID
 删除文件，rm xxx 工作区删除，版本库还在，
 彻底删除： git rm xxx；git commit -m 'xxx' 不彻底删除即可恢复git checkout -- readme.txt 注：只能恢复文件到最新版本
+git remote 不带参数，列出已经存在的远程分支
+git pull origin master 取回远程库并关联当前分支
