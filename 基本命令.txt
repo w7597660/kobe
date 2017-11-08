@@ -53,6 +53,7 @@ scp ywb_root@114.55.129.7:/home/ywb_root/ucs_mp.sql.tar.gz . 远程传输
 XXXX = input()
 XXXX                 设置变量
 
+ssh -T git@github.com   链接服务器
 提交顺序： git add 文件,   git commit -m 'XXX'  
 git checkout -- readme.txt   撤销修改，回到最近一次版本
 git status  查看git库当前状态
