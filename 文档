@@ -1,0 +1,894 @@
+# kobe
+CREATE DATABASE  bordrin_sys_write DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+CREATE USER 'bordrin'@'localhost' IDENTIFIED BY '123456';
+
+GRANT privileges ON databasename.tablename TO 'username'@'host'
+
+grant all privileges on bojun.* to 'bordrin'@'10.9.1.%' identified by '123456';
+
+REVOKE privilege ON databasename.tablename FROM 'username'@'host';
+rename user 'tbox_tcu'@'10.24.160.95' to 'tbox_tcu'@'10.24.160.74' ;
+
+flush privileges
+rsync -a --delete-before --progress -d /tmp/xxx/ shard22    快删大文件夹     rs.stepdown(120)；
+
+
+---------------------
+nginx标准配置（nginx.conf)
+
+user www;
+worker_processes 16;
+
+error_log  /data/www/logs/nginx/error.log;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include       /etc/nginx/mime.types;
+  default_type  application/octet-stream;
+
+  log_format  main '$http_x_forwarded_for - $remote_user [$time_local]  $status ' '"$request" $body_bytes_sent "$http_referer" ' '"$http_user_agent" "$http_x_forwarded_for"' '[$request_time]';
+
+  access_log  /data/www/logs/nginx/access.log;
+
+  sendfile    on;
+
+  server_tokens on;
+
+
+  types_hash_max_size 1024;
+  types_hash_bucket_size 512;
+
+  server_names_hash_bucket_size 64;
+
+  keepalive_timeout  65;
+  tcp_nodelay        on;
+
+  charset utf-8;
+
+  gzip         on;
+  gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+
+
+
+  include /etc/nginx/conf.d/*.conf;
+
+}
+--------------------
+vhost.conf
+
+server {
+  listen                *:8080;
+
+  server_name           api1.51hcb.com;
+
+  access_log            /data/www/logs/nginx/api1.51hcb.com.access.log  main;
+  error_log             /data/www/logs/nginx/api1.51hcb.com.error.log;
+
+  location / {
+    proxy_pass          http://hcb-if2;
+    proxy_read_timeout  90;
+  }
+
+
+
+         location ~ ^(.*)\/\.svn\/ {
+
+         return 404;
+
+         }
+
+
+}
+---------------
+static.conf()
+server {
+  listen                *:8081;
+
+  server_name           static.51hcb.com;
+
+  access_log            /data/www/logs/nginx/static.51hcb.com.access.log  main;
+  error_log             /data/www/logs/nginx/static.51hcb.com.error.log;
+
+  location / {
+    root  /data/www/static/hcb;
+    index  index.html index.htm index.php;
+  }
+
+}
+-----------------
+proxy.conf（nginx）
+
+proxy_redirect          off;
+client_max_body_size    20m;
+client_body_buffer_size 128k;
+proxy_connect_timeout   90;
+proxy_send_timeout      90;
+proxy_read_timeout      90;
+proxy_buffers           32 4k;
+proxy_next_upstream     error  timeout invalid_header  http_500  http_502  http_503  http_504 ;
+proxy_http_version      1.0;
+
+proxy_set_header        Host $host;
+proxy_set_header        X-Real-IP $remote_addr;
+proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+----------------
+
+upstream.conf
+
+upstream tomcat8010 {
+  sticky ;
+  server     172.16.40.251:8010 max_fails=30 fail_timeout=60s;
+  server     172.16.40.242:8010 max_fails=30 fail_timeout=60s;
+}
+
+---------------
+
+虚拟机外网访问配置(nginx)
+
+upstream service_3_pool {
+    server 192.168.100.165:80;
+	}
+
+server {
+    listen  80;
+    server_name  tuid.ceshi.com   mapitest.chinatsp.com.cn hcbfriguide.cheguoguo.com chanaasstest.chinatsp.com hcbwxcs.cheguoguo.com hcbapitest.cheguoguo.com wx.cheguoguo.com lucene.cheguoguo.com dl.cheguoguo.com hz.cheguoguo.com wxoss.cheguoguo.com static.chinatsp.com upload.chanaapp.chinatsp.com yximgtest.cheguoguo.com jf.cheguoguo.com s-policy.yttsp.com geelypay.cheguoguo.com geelywxtest.yttsp.com;
+    location / {
+	proxy_set_header Host $host;
+	proxy_set_header X-Forwarded_For $remote_addr;
+	proxy_pass http://service_3_pool;
+	}
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|html|shtml)$ {
+	proxy_cache cache_one;
+	proxy_cache_valid 200 10m;
+	proxy_cache_valid 304 1m;
+	proxy_cache_valid 301 302 1h;
+	proxy_cache_valid any 1m;
+	proxy_cache_key $host$uri$is_args$args;
+	proxy_set_header Host $host;
+	proxy_set_header X-Forwarded_For $remote_addr;
+	proxy_pass http://service_3_pool;
+	}
+    location ~ ^(.*)\/\.svn\/ {
+        return 403;
+    }
+access_log /data/www/logs/nginx/service_3.log log;
+}
+
+server {
+    listen  443 ssl;
+    server_name    mapitest.chinatsp.com.cn hcbapitest.cheguoguo.com;
+    #ssl_certificate  /ssl_ca/server.crt;
+    #ssl_certificate_key  /ssl_ca/server_nopwd.key;
+    ssl_certificate  /data/nginx/ssl_ca/server.crt;
+    ssl_certificate_key  /data/nginx/ssl_ca/server_nopwd.key;
+    location / {
+	proxy_set_header Host $host;
+	proxy_set_header X-Forwarded_For $remote_addr;
+	proxy_pass http://service_3_pool;
+	}
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|html|shtml)$ {
+	proxy_cache cache_one;
+	proxy_cache_valid 200 10m;
+	proxy_cache_valid 304 1m;
+	proxy_cache_valid 301 302 1h;
+	proxy_cache_valid any 1m;
+	proxy_cache_key $host$uri$is_args$args;
+	proxy_set_header Host $host;
+	proxy_set_header X-Forwarded_For $remote_addr;
+	proxy_pass http://service_3_pool;
+	}
+    location ~ ^(.*)\/\.svn\/ {
+        return 403;
+    }
+access_log /data/www/logs/nginx/service_3.log log;
+}
+
+---------------
+
+443配置（nginx）
+
+upstream service_1_pool {
+    server 192.168.100.163:80;
+	}
+upstream service_1_443 {
+    server 192.168.100.163:443;
+	}
+
+server {
+	listen  80;
+	server_name  ocean.yttsp.com cargat-test.yttsp.com soa-demo.yttsp.com fotatest.yttsp.com zjunicom.chinatsp.com 95190.i-call.com s-repairtest.yttsp.com s-maintaintest.yttsp.com casystatic.chinatsp.com accident.cheguoguo.com s-maintaintest-api.yttsp.com  mpwxcs.yttsp.com yt.yttsp.com;
+	location / {
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded_For $remote_addr;
+		proxy_pass http://service_1_pool;
+	}
+	location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|html|shtml)$ {
+		proxy_cache cache_one;
+		proxy_cache_valid 200 10m;
+		proxy_cache_valid 304 1m;
+		proxy_cache_valid 301 302 1h;
+		proxy_cache_valid any 1m;
+		proxy_cache_key $host$uri$is_args$args;
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded_For $remote_addr;
+		proxy_pass http://service_1_pool;
+	}
+    location ~ ^(.*)\/\.svn\/ {
+        return 403;
+    }
+access_log /data/www/logs/nginx/service_1.log;
+}
+
+server {
+    listen  443 ssl;
+    server_name    bqtest.yttsp.com fotatest.yttsp.com s-maintaintest.yttsp.com;
+    ssl_certificate  /data/nginx/ssl_ca/yttsp.com.crt;
+    ssl_certificate_key  /data/nginx/ssl_ca/yttsp.com.key;
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded_For $remote_addr;
+        proxy_pass https://service_1_443; 
+        }
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|html|shtml)$ {
+        proxy_cache cache_one;
+        proxy_cache_valid 200 10m;
+        proxy_cache_valid 304 1m;
+        proxy_cache_valid 301 302 1h;
+        proxy_cache_valid any 1m;
+        proxy_cache_key $host$uri$is_args$args;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded_For $remote_addr;
+        proxy_pass https://service_1_pool;
+        }
+    location ~ ^(.*)\/\.svn\/ {
+        return 403;
+    }
+access_log /data/www/logs/nginx/service_1_443.log;
+}
+
+-------------
+
+Online---haproxy()
+
+#---------------------------------------------------------------------
+# Example configuration for a possible web application.  See the
+# full configuration options online.
+#
+#   http://haproxy.1wt.eu/download/1.4/doc/configuration.txt
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+    # to have these messages end up in /var/log/haproxy.log you will
+    # need to:
+    #
+    # 1) configure syslog to accept network log events.  This is done
+    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
+    #    /etc/sysconfig/syslog
+    #
+    # 2) configure local2 events to go to the /var/log/haproxy.log
+    #   file. A line like the following can be added to
+    #   /etc/sysconfig/syslog
+    #
+    #    local2.*                       /var/log/haproxy.log
+    #
+    log         127.0.0.1 local2
+
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    tune.ssl.default-dh-param 2048
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+
+
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forceclose
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    stats uri /stats
+    stats realm ChinaTSP\ Haproxy  
+    stats auth admin:123qwe
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 30000
+
+#---------------------------------------------------------------------
+# main frontend which proxys to the backends
+#---------------------------------------------------------------------
+frontend  main *:80
+
+    acl url_hcb_web     hdr_beg(host)   -i      www.51hcb.com m.51hcb.com data.51hcb.com
+    acl url_hcb_oss     hdr_beg(host)   -i      oss.51hcb.com
+    acl url_haima       hdr_beg(host)   -i      haima.yttsp.com haimah5.yttsp.com hqcup.yttsp.com fuxi.yttsp.com
+    acl url_hcb_wx      hdr_beg(host)   -i      wx.51hcb.com jf.51hcb.com
+    acl url_hcb_ws      hdr_beg(host)   -i      ws.51hcb.com std-car-api.yttsp.com std-car.yttsp.com hmota.yttsp.com vapp-repair.yttsp.com vapp-sos.yttsp.com
+    acl url_hcb_if2     hdr_beg(host)   -i      api1.51hcb.com
+    acl url_hcb_lucene	hdr_beg(host)   -i      s-api.51hcb.com hcyapi.yttsp.com hcyweb.yttsp.com hcyoss.yttsp.com
+    acl url_tomcat_is	hdr_beg(host)   -i      isoss.yttsp.com isapi.yttsp.com isactivity.yttsp.com
+    acl url_hcb_static  hdr_beg(host)   -i      hcbstatic.chinatsp.com static.51hcb.com hcyimg.yttsp.com hq.yttsp.com
+
+#-----------------------------
+#   oss.51hcb.com  allow ip
+#------------------------------
+   acl allow_oss_src  src 127.0.0.1
+   acl allow_oss_src  src 10.171.82.16
+   acl allow_oss_src  src 172.16.40.217
+   acl allow_oss_src  src 10.170.229.169
+   acl allow_oss_src  src 172.16.40.252
+   acl allow_oss_src  src 36.110.36.170
+   acl allow_oss_src  src 36.110.36.162
+   acl allow_oss_src  src 114.251.64.34
+   acl allow_oss_src  src 182.92.214.101
+   acl allow_oss_src  src 101.200.77.63
+   acl allow_oss_src  src 123.56.137.219
+   acl allow_oss_src  src 222.222.111.209
+   acl allow_oss_src  src 60.10.197.145
+   acl allow_oss_src  src 218.17.157.149 
+   acl allow_oss_src  src 182.92.176.168 
+
+
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  101.200.77.63
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  123.56.137.219
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  182.92.214.101
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  36.110.36.162
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  36.110.36.170
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  114.251.64.34
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  222.222.111.209
+   acl allow_oss_src  hdr_ip(x-forwarded-for)  60.10.197.145
+
+   acl allow_oss_src hdr_ip(x-forwarded-for) 121.43.18.0/24
+#######20181213#########
+acl allow_src  hdr_ip(x-forwarded-for)  121.43.18.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  120.25.115.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  101.200.106.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  120.55.177.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  120.27.173.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  120.55.107.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  123.57.117.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  120.76.16.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  182.92.253.32/27 
+acl allow_src  hdr_ip(x-forwarded-for)  60.205.193.64/27 
+acl allow_src  hdr_ip(x-forwarded-for)  60.205.193.96/27 
+acl allow_src  hdr_ip(x-forwarded-for)  120.78.44.128/26 
+acl allow_src  hdr_ip(x-forwarded-for)  118.178.15.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  39.106.237.192/26 
+acl allow_src  hdr_ip(x-forwarded-for)  106.15.101.96/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.101.16.64/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.106.31.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.98.74.0/25 
+acl allow_src  hdr_ip(x-forwarded-for)  47.97.242.96/27 
+acl allow_src  hdr_ip(x-forwarded-for)  112.124.159.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  39.96.130.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  39.96.119.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.99.20.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.104.53.0/26 
+acl allow_src  hdr_ip(x-forwarded-for)  47.108.23.192/26  
+acl allow_src  hdr_ip(x-forwarded-for)  47.89.1.160/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.89.7.192/26 
+acl allow_src  hdr_ip(x-forwarded-for)  47.88.145.96/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.88.250.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.52.120.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.254.217.32/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.88.74.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.89.132.224/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.91.69.64/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.91.54.128/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.74.160.0/24 
+acl allow_src  hdr_ip(x-forwarded-for)  47.91.113.64/27 
+acl allow_src  hdr_ip(x-forwarded-for)  149.129.211.0/27 
+acl allow_src  hdr_ip(x-forwarded-for)  149.129.140.0/27 
+acl allow_src  hdr_ip(x-forwarded-for)  47.89.7.224/27 
+acl allow_src  hdr_ip(x-forwarded-for)  8.208.2.192/27  
+#################
+
+   acl allow_oss_src hdr_ip(x-forwarded-for) 120.25.115.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 101.200.106.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 120.55.177.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 120.27.173.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 112.124.214.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 42.121.40.0/22
+   acl allow_oss_src hdr_ip(x-forwarded-for) 120.55.107.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 118.178.15.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 123.57.117.0/24
+   acl allow_oss_src hdr_ip(x-forwarded-for) 120.76.16.0/24
+
+   acl allow_oss_src hdr_ip(x-forwarded-for) 218.17.157.149
+
+
+#---
+# rate limit
+#---
+
+  tcp-request inspect-delay 5s
+ 
+  acl document_request path_beg -i /api/1.0/mp/getverfycode/
+  acl too_many_sms sc0_gpc0_rate() gt 10
+  acl mark_seen sc0_inc_gpc0 gt 0
+ 
+  stick-table type string size 100k store gpc0_rate(60s)
+  tcp-request content track-sc0 hdr(x-forwarded-for) if HTTP url_hcb_if2 METH_GET document_request
+
+ 
+
+########################## block #################
+    acl block_url  path_reg -i \.svn
+    
+    http-request deny if block_url
+    http-request deny if url_hcb_oss !allow_oss_src 
+    http-request deny if mark_seen too_many_sms url_hcb_if2
+
+############### 后装 #################
+    acl url_hz_web	hdr_beg(host)   -i      hz.51hcb.com 
+    acl url_hz_if	hdr_beg(host)   -i      hzapi.51hcb.com
+
+    use_backend hcb		if      url_hcb_web
+    use_backend hcb		if      url_hcb_oss  allow_oss_src
+    use_backend hcb-web2	if      url_hcb_wx
+    use_backend haima		if      url_haima
+    use_backend hcb-ws		if      url_hcb_ws
+    use_backend hcb-if2		if      url_hcb_if2
+    use_backend hcb-lucene	if      url_hcb_lucene
+    use_backend hcbstatic	if      url_hcb_static
+
+############### 后装 #################
+    use_backend hz-web		if      url_hz_web
+    use_backend hz-if		if      url_hz_if
+
+############### 智能服务 #################
+    use_backend tomcat_is	if      url_tomcat_is
+    use_backend haima	        if      url_haima
+    use_backend hcb-web2	if      url_hcb_wx
+
+    # log the name of the virtual server
+    capture request  header Host len 20
+    capture request header X-Forwarded-For len 15
+
+    default_backend             hcb
+
+
+#---------------------------------------------------------------------
+# ssl
+#---------------------------------------------------------------------
+frontend  sslxxx
+
+mode http
+#bind  *:443 ssl crt /etc/haproxy/51hcb-server.pem 
+bind  *:443 ssl crt /etc/haproxy/51hcb.pem  crt /etc/haproxy/yttsp-server.pem
+
+    acl url_hcb_if2     hdr_beg(host)   -i      api1.51hcb.com
+    acl url_hcb_lucene	hdr_beg(host)   -i      s-api.51hcb.com
+    acl url_hz_if	hdr_beg(host)   -i      hzapi.51hcb.com
+    acl url_haima	hdr_beg(host)   -i      haima.yttsp.com
+
+    use_backend hcb-if2		if      url_hcb_if2
+    use_backend hcb-lucene	if      url_hcb_lucene
+    use_backend hz-if		if      url_hz_if
+    use_backend haima		if      url_haima
+
+    # log the name of the virtual server
+    capture request  header Host len 20
+
+
+#---
+# rate limit
+#---
+
+  tcp-request inspect-delay 5s
+
+  acl document_request path_beg -i /api/1.0/mp/getverfycode/
+  acl too_many_sms sc0_gpc0_rate() gt 50
+  acl mark_seen sc0_inc_gpc0 gt 0
+
+  stick-table type string size 100k store gpc0_rate(60s)
+  tcp-request content track-sc0 hdr(x-forwarded-for) if HTTP url_hcb_if2 METH_GET document_request
+
+
+    default_backend             hcb
+
+#---------------------------------------------------------------------
+backend hcb
+    balance  roundrobin
+    timeout server          3m
+    server  hcb-1 127.0.0.1:8080 check
+
+backend hcb-if2
+    balance  roundrobin
+    timeout server          3m
+    server  app-1 172.16.40.217:8002 minconn 50 maxconn 500  check inter 1000
+#    server  app-2 10.170.229.169:8002 minconn 50 maxconn 500 check inter 1000
+
+backend hcb-web2
+    balance  roundrobin
+#    balance  source
+    timeout server          3m
+    server  app-1 172.16.40.217:8003 minconn 50 maxconn 500  check inter 1000
+#    server  app-2 10.170.229.169:8003 minconn 50 maxconn 500 check inter 1000
+
+backend hcb-ws
+    balance  source
+    timeout server          3m
+    server  app-1 172.16.40.217:8004 minconn 50 maxconn 500  check inter 1000
+#    server  app-2 10.170.229.169:8004 minconn 50 maxconn 500 check inter 1000
+
+backend hz-web
+    balance  source
+    timeout server          3m
+    server  hzweb-1 172.16.40.217:8001 minconn 50 maxconn 500  check inter 1000
+#    server  hzweb-2 10.170.229.169:8001 minconn 50 maxconn 500 check inter 1000
+backend hz-if
+    balance  roundrobin
+    timeout server          3m
+    server  hzif-1 172.16.40.217:8006 minconn 50 maxconn 500  check inter 1000
+#    server  hzif-2 10.170.229.169:8006 minconn 50 maxconn 500 check inter 1000
+
+backend tomcat_is
+    balance  roundrobin
+    timeout server          3m
+    server  tomcat-1 172.16.40.217:8007 minconn 50 maxconn 500  check inter 1000
+#    server  tomcat-2 10.170.229.169:8007 minconn 50 maxconn 500 check inter 1000
+
+backend hcb-lucene
+    balance  roundrobin
+    timeout server          3m
+    server  app-1 172.16.40.217:8008  minconn 50 maxconn 500  check inter 1000
+
+backend haima
+    balance  roundrobin
+    timeout server          3m
+    server  haima 172.16.40.217:8006  maxconn 30000  check inter 1000
+backend hcbstatic
+    balance  roundrobin
+    server  hcbstatic-1 127.0.0.1:8081 check
+
+
+
+backend be_slow_down
+  timeout tarpit 2s
+  http-request tarpit
+  
+--------------------
+
+mongo---back.sh
+
+#!/bin/bash
+#mkdir /data/mysqlbackup/mongodb/mongodb_`date +\%F`
+/usr/local/mongodb-linux-x86_64-2.6.1/bin/mongodump -h 172.16.40.217 -o /data/mysqlbackup/mongodb/mongodb_`date +\%F`> /data/mysqlbackup/mongodb/mongodb_backup.log
+cd /data/mysqlbackup/mongodb
+tar zcvf mongo`date +\%F`.tar.gz mongodb_`date +\%F` >> /data/mysqlbackup/mongodb/mongodb_backup.log
+rm -rf mongodb_`date +\%F`
+find /data/mysqlbackup/mongodb/ -name "*.tar.gz" -mtime +7 -exec rm -fr {} \;
+---------------
+
+mysql---back.sh
+
+#!/bin/bash
+echo `date +\%F` >>/data/mysqlbackup/mysql/mysql_backup.log
+cd /data/mysqlbackup/mysql/
+/usr/bin/mysqldump -S /data/mysql/mysql.sock -uhtxtb -pchinatsp  --single-transaction --databases --all-databases -r /data/mysqlbackup/mysql/mysql.`date +\%F`.sql   >>/data/mysqlbackup/mysql/mysql_backup.log
+tar zcvf mysql.`date +\%F`.sql.tar.gz mysql.`date +\%F`.sql >> /data/mysqlbackup/mysql/mysql_backup.log
+find /data/mysqlbackup/mysql/ -name "*.sql" -exec rm {} \;
+find /data/mysqlbackup/mysql/ -name "*.sql.tar.gz" -mtime +10 -exec rm {} \;
+-------------
+
+Tomcat守护脚本
+
+while :;
+do
+        curl_id=`ps -ef|grep -v grep|grep '127.0.0.1:8001'|grep curl|awk '{print $2}'|tr -d '\n'`
+
+        if [ -n "${curl_id}" ]; then
+            /bin/kill ${curl_id}
+        fi
+
+        Err_num=`curl -o /dev/null  -m 10 --connect-timeout 10 -I -s -w %{http_code} -H"HOST:api.51hcb.com" "http://127.0.0.1:8001/api/1.0/user/inf/service_list/"`
+
+        if [ ${Err_num} = 000 ]; then
+           echo `date +"%F %T"` ----"hcb-if service restart..." >>/var/log/hcb-web-mon.log
+
+           if [ -e  /var/run/hcb-if.pid ]; then
+           /bin/kill -9 `cat /var/run/hcb-if.pid|tr -d '\n'`
+           /etc/init.d/hcb-if restart
+           fi
+
+        fi
+        sleep  10
+done
+
+
+while :;
+
+do
+
+        nc -w2 127.0.0.1  8003
+        if [ $? != 0 ]; then
+                echo `date +"%Y-%m-%d %H:%M:%S"` 'port 8003 downed，restart 8003'>> /var/log/Run_8003.log
+                /etc/init.d/tomcat_8003 restart
+                sleep 30
+        fi
+
+        echo 8003  ok...
+        sleep 0.2
+done
+
+----------------
+
+haproxy守护脚本
+
+while :;
+do
+        ha_num=`ps -ef | grep -v grep |grep -c haproxy.cfg`
+        if [ $ha_num -eq 0 ]; then
+                /etc/init.d/haproxy restart
+                echo `date +"%F %T"` ----"restart Haproxy" >>/var/log/ha-mon.log
+        fi
+
+        sleep 0.2
+
+done
+---------------
+
+Tomcat标准配置
+
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Note:  A "Server" is not itself a "Container", so you may not
+     define subcomponents such as "Valves" at this level.
+     Documentation at /docs/config/server.html
+ -->
+<Server port="9006" shutdown="SHUTDOWN">
+  <!-- Security listener. Documentation at /docs/config/listeners.html
+  <Listener className="org.apache.catalina.security.SecurityListener" />
+  -->
+  <!--APR library loader. Documentation at /docs/apr.html -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <!--Initialize Jasper prior to webapps are loaded. Documentation at /docs/jasper-howto.html -->
+  <Listener className="org.apache.catalina.core.JasperListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.JmxRemoteLifecycleListener" rmiRegistryPortPlatform="10063" rmiServerPortPlatform="10062" />
+
+  <!-- Global JNDI resources
+       Documentation at /docs/jndi-resources-howto.html
+  -->
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users
+    -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
+
+  <!-- A "Service" is a collection of one or more "Connectors" that share
+       a single "Container" Note:  A "Service" is not itself a "Container",
+       so you may not define subcomponents such as "Valves" at this level.
+       Documentation at /docs/config/service.html
+   -->
+  <Service name="Catalina">
+
+    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+    <!--
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+        maxThreads="150" minSpareThreads="4"/>
+    -->
+
+
+    <!-- A "Connector" represents an endpoint by which requests are received
+         and responses are returned. Documentation at :
+         Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+         Java AJP  Connector: /docs/config/ajp.html
+         APR (HTTP/AJP) Connector: /docs/apr.html
+         Define a non-SSL HTTP/1.1 Connector on port 8080
+    -->
+    <Connector port="8006" protocol="HTTP/1.1"
+               maxHttpHeaderSize="8192" useBodyEncodingForURI="true" maxThreads="30000"
+               compression="on" compressionMinSize="2048"
+               compressableMimeType="text/html,text/xml,text/javascript,text/css,text/plain"
+               disableUploadTimeout='true'
+               minSpareThreads="10"
+               maxSpareThreads="1024"
+               acceptCount="1024"
+               connectionTimeout="30000" enableLookups="false"
+               URIEncoding="UTF-8"
+               redirectPort="11694" />
+    <!-- A "Connector" using the shared thread pool-->
+    <!--
+    <Connector executor="tomcatThreadPool"
+               port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="11694" />
+    -->
+    <!-- Define a SSL HTTP/1.1 Connector on port 11694
+         This connector uses the JSSE configuration, when using APR, the
+         connector should be using the OpenSSL style configuration
+         described in the APR documentation -->
+    <!--
+    <Connector port="11694" protocol="HTTP/1.1" SSLEnabled="true"
+               maxThreads="150" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" />
+    -->
+
+    <!-- Define an AJP 1.3 Connector on port 25039 -->
+    <!-- <Connector port="25039" protocol="AJP/1.3" redirectPort="11694" /> -->
+
+
+    <!-- An Engine represents the entry point (within Catalina) that processes
+         every request.  The Engine implementation for Tomcat stand alone
+         analyzes the HTTP headers included with the request, and passes them
+         on to the appropriate Host (virtual host).
+         Documentation at /docs/config/engine.html -->
+
+    <!-- You should set jvmRoute to support load-balancing via AJP ie :
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+    -->
+    <Engine name="Catalina" defaultHost="localhost">
+
+      <!--For clustering, please take a look at documentation at:
+          /docs/cluster-howto.html  (simple how to)
+          /docs/config/cluster.html (reference documentation) -->
+
+      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+           via a brute-force attack -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <!-- This Realm uses the UserDatabase configured in the global JNDI
+             resources under the key "UserDatabase".  Any edits
+             that are performed against this UserDatabase are immediately
+             available for use by the Realm.  -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
+
+      
+        <Host name="hqcup.yttsp.com"  appBase="webapps/test"
+         unpackWARs="true" autoDeploy="true" undeployOldVersions="true">
+        <Context path="" docBase="/data/www/app/hz-if/webapps/hq_activity" reloadable="false"></Context>
+        </Host> 
+        <Host name="fuxi.yttsp.com"  appBase="webapps/test"
+         unpackWARs="true" autoDeploy="true" undeployOldVersions="true">
+        <Context path="" docBase="/data/www/app/hz-if/webapps/fuxi_oss" reloadable="false"></Context>
+        <Context path="/monitor" docBase="/data/www/app/hz-if/webapps/fuxi-monitor" reloadable="false"></Context>
+        </Host> 
+
+        <!-- SingleSignOn valve, share authentication between web applications
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+        -->
+        <!-- Remote IP Valve: X-forwarded-for -> request.address-->
+        <Valve className="org.apache.catalina.valves.RemoteIpValve" />
+        
+        <!-- Access log processes all example.
+             Documentation at: /docs/config/valve.html -->
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access_log" suffix=".txt"
+               pattern="%h %l %u %t &quot;%r&quot; %s %b %T %{User-Agent}i"
+	       rotatable="false" requestAttributesEnabled="true"/>
+        
+    </Engine>
+  </Service>
+</Server>
+-------------------
+
+sysconfig tomcat
+
+# Where your tomcat installation lives
+CATALINA_HOME="/usr/share/tomcat7"
+CATALINA_BASE="/data/www/app/tomcat_api"
+CATALINA_TMPDIR="$CATALINA_BASE/temp"
+
+JVM_OPTS="-server -Xmx1024m -Xms512m -XX:PermSize=512M -XX:MaxPermSize=2048m -Dmy.java.opt=i_love_java -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+
+JAVA_OPTS="${JVM_OPTS}"
+
+# What user should run tomcat
+TOMCAT_USER="webuser"
+
+TOMCAT_LOG=/data/www/app/tomcat_api/logs/catalina.out
+
+# You can change your tomcat locale here
+#LANG="en_US"
+
+# Run tomcat under the Java Security Manager
+#SECURITY_MANAGER="false"
+
+# Time to wait in seconds, before killing process
+SHUTDOWN_WAIT="10"
+
+# Whether to annoy the user with "attempting to shut down" messages or not
+#SHUTDOWN_VERBOSE="false"
+
+# Set the TOMCAT_PID location
+CATALINA_PID="/var/run/tomcat_api.pid"
+
+TOMCAT_CFG=/etc/sysconfig/tomcat_api
+
+
+
+------------------
+更改mysql root
+https://www.osyunwei.com/archives/2014.html
+
+学习文档：
+https://edu.aliyun.com/roadmap/python?spm=5176.11399608.dnewclick.ddawen.1e814679f9rgQs  (python)
+mongo文档
+https://yq.aliyun.com/articles/606187
+mongo分片搭建
+https://www.cnblogs.com/zhoujinyi/p/4635444.html
+redis
+https://www.cnblogs.com/zhoujinyi/p/9249873.html
+https://www.cnblogs.com/wuxl360/p/5920330.html
+----------------------------
+mongo.conf
+
+#where to log
+logpath=/data/mongodb/mongod.log
+logappend=true
+
+# fork and run in background
+fork = true
+port = 27017
+dbpath= /data/mongodb
+pidfilepath = /data/mongodb/mongod.pid
+#auth = chinatsp
+
+journal=true
+quiet=true
+master=true
+#slave=true
+#autoresync=true
+oplogSize=2048
+nssize=32
+--------------------------
+
+
+
+
+
